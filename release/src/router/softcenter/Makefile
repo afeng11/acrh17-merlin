@@ -1,5 +1,18 @@
 include ../common.mak
 
+SC_ARCH=armng
+ifeq ($(RTCONFIG_LANTIQ),y)
+SC_ARCH=mips
+else ifeq ($(RTCONFIG_RALINK_MT7621),y)
+SC_ARCH=mipsle
+else ifeq ($(or $(RTCONFIG_SOC_IPQ50XX),$(RTCONFIG_RALINK_MT7986),$(AARCH64)),y)
+SC_ARCH=arm64
+else ifeq ($(BRCM_CHIP),$(or 4908,4912))
+SC_ARCH=arm64
+else ifeq ($(BUILD_NAME), $(filter $(BUILD_NAME), RT-AC68U RT-AC88U RT-AC3100 RT-AC3200 RT-AC5300))
+SC_ARCH=arm
+endif
+
 #export SC_BUILD=y
 all: versioncmp base64_encode resolveip
 
@@ -14,13 +27,12 @@ resolveip:
 	$(STRIP) resolveip
 
 install:
-	install -d $(INSTALLDIR)/sbin
 	install -d $(INSTALLDIR)/usr/sbin
 	install -d $(INSTALLDIR)/lib
 	install -d $(INSTALLDIR)/usr/bin
 	install -d $(INSTALLDIR)/usr/share
 	install -d $(INSTALLDIR)/usr/lib
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3))
+ifeq ($(SWRT_NAME), $(filter $(SWRT_NAME), K3))
 	install -d $(INSTALLDIR)/mcu
 endif
 	install -d $(INSTALLDIR)/rom/etc
@@ -44,15 +56,14 @@ endif
 	install -d $(INSTALLDIR)/rom/etc/softcenter/webs
 	install -d $(INSTALLDIR)/rom/etc/softcenter/perp
 	install -d $(INSTALLDIR)/rom/etc/softcenter/scripts
-ifeq ($(BUILD_NAME), $(filter $(BUILD_NAME), GT-AC2900 GT-AC5300 TUF-AX3000))
 	install -d $(INSTALLDIR)/rom/etc/softcenter/ROG/res
-endif
 # softcenter
 	install -m 0755 versioncmp $(INSTALLDIR)/usr/sbin
 	install -m 0755 base64_encode $(INSTALLDIR)/usr/sbin
 	install -m 0755 resolveip $(INSTALLDIR)/usr/sbin
 	install -m 0755 softcenter/automount.sh $(INSTALLDIR)/rom/etc/softcenter
-	install -m 0755 softcenter/bin/jq $(INSTALLDIR)/rom/etc/softcenter/bin
+	install -m 0755 softcenter/bin_arch/$(SC_ARCH)/jq $(INSTALLDIR)/rom/etc/softcenter/bin
+	install -m 0755 softcenter/bin_arch/$(SC_ARCH)/sc_auth $(INSTALLDIR)/rom/etc/softcenter/bin
 	install -m 0755 softcenter/bin/softcenter.sh $(INSTALLDIR)/rom/etc/softcenter/bin
 	install -m 0755 softcenter/bin/softcenter-mount.sh $(INSTALLDIR)/rom/etc/softcenter/bin
 	install -m 0755 softcenter/bin/softcenter-net.sh $(INSTALLDIR)/rom/etc/softcenter/bin
@@ -63,7 +74,7 @@ endif
 	install -m 0755 softcenter/res/sc1EN.json $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/sc1TW.json $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/icon-default.png $(INSTALLDIR)/rom/etc/softcenter/res
-	install -m 0755 softcenter/res/merlinr.png $(INSTALLDIR)/rom/etc/softcenter/res
+	install -m 0755 softcenter/res/swrt.png $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/upgrade.png $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/softcenter.js $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/softcenter.css $(INSTALLDIR)/rom/etc/softcenter/res
@@ -79,29 +90,23 @@ endif
 	install -m 0755 softcenter/res/layer/theme/default/loading-2.gif $(INSTALLDIR)/rom/etc/softcenter/res/layer/theme/default
 	install -m 0755 softcenter/webs/Main_Soft_center.asp $(INSTALLDIR)/rom/etc/softcenter/webs
 	install -m 0755 softcenter/webs/Main_Soft_setting.asp $(INSTALLDIR)/rom/etc/softcenter/webs
-	install -m 0755 softcenter/perp/perp.sh $(INSTALLDIR)/rom/etc/softcenter/perp
 	install -m 0755 softcenter/scripts/base.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
 	install -m 0755 softcenter/scripts/dummy_script.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
 	install -m 0755 softcenter/scripts/ks_app_install.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
 	install -m 0755 softcenter/scripts/ks_tar_install.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
 	#install -m 0755 softcenter/scripts/pluginbase.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3C))	
-	install -m 0755 mtd $(INSTALLDIR)/sbin
-endif
-ifeq ($(BUILD_NAME), $(filter $(BUILD_NAME), GT-AC2900 GT-AC5300 TUF-AX3000))
 	install -m 0755 softcenter/ROG/res/softcenter.css $(INSTALLDIR)/rom/etc/softcenter/ROG/res
-endif
 	install -m 0755 jffsinit.sh $(INSTALLDIR)/usr/sbin
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3))
-	install -m 0755 uhmiMsg $(INSTALLDIR)/usr/sbin
+ifeq ($(SWRT_NAME), $(filter $(SWRT_NAME), K3))
+	install -m 0755 mcu/uhmiMsg $(INSTALLDIR)/usr/sbin
 	install -m 0644 mcu/app.2.2.120.bin $(INSTALLDIR)/mcu
 	install -m 0644 mcu/app.1.2.116.hex $(INSTALLDIR)/mcu
 	install -m 0644 mcu/app.1.1.116.hex $(INSTALLDIR)/mcu
-	install -m 0755 phi_speed $(INSTALLDIR)/usr/sbin
-	install -m 0755 libwlcr.so $(INSTALLDIR)/usr/share
-	install -m 0755 uhmi $(INSTALLDIR)/usr/sbin
-	install -m 0755 weather $(INSTALLDIR)/usr/sbin
-	install -m 0755 wl_cr $(INSTALLDIR)/usr/sbin
+	install -m 0755 mcu/phi_speed $(INSTALLDIR)/usr/sbin
+	install -m 0755 mcu/libwlcr.so $(INSTALLDIR)/usr/share
+	install -m 0755 mcu/uhmi $(INSTALLDIR)/usr/sbin
+	install -m 0755 mcu/weather $(INSTALLDIR)/usr/sbin
+	install -m 0755 mcu/wl_cr $(INSTALLDIR)/usr/sbin
 endif
 	install -m 0755 plugin.sh $(INSTALLDIR)/usr/sbin
 	install -m 0755 helper.sh $(INSTALLDIR)/usr/sbin
@@ -117,31 +122,18 @@ else
 	install -m 0755 scEN.json $(INSTALLDIR)/www/res
 	install -m 0755 scTW.json $(INSTALLDIR)/www/res
 	install -m 0755 Softcenter.asp $(INSTALLDIR)/www
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), SBRAC1900P SBRAC3200P))
-	install -m 0755 key.asp $(INSTALLDIR)/www
 endif
-endif
-ifeq ($(or $(RTCONFIG_LANTIQ),$(RTCONFIG_QCA),$(RTCONFIG_RALINK)),y)
-	install -m 0755 sysinfo/lantiq/Tools_Sysinfo.asp $(INSTALLDIR)/www/
-else ifeq ($(K3),y)
-	install -m 0755 sysinfo/k3/Tools_Sysinfo.asp $(INSTALLDIR)/www
-else ifeq ($(R7000P),y)
-	install -m 0755 sysinfo/r7000p/Tools_Sysinfo.asp $(INSTALLDIR)/www
-else ifeq ($(or $(EA6700),$(DIR868L)),y)
-	install -m 0755 sysinfo/ea6700/Tools_Sysinfo.asp $(INSTALLDIR)/www
-else ifeq ($(HND_ROUTER), y)
-	install -m 0755 sysinfo/Tools_Sysinfo.asp $(INSTALLDIR)/www/www
-else
-	install -m 0755 sysinfo/Tools_Sysinfo.asp $(INSTALLDIR)/www
-endif
-ifeq ($(or $(MERLINR_VER_MAJOR_R),$(MERLINR_VER_MAJOR_X)),y)
-ifeq ($(or $(K3),$(R8500),$(XWR3100),$(TY6201_RTK),$(TY6201_BCM)),y)
+ifeq ($(SWRT_NAME), $(filter $(SWRT_NAME), SBRAC1900P SBRAC3200P K3 R8500 XWR3100 TY6201_RTK TY6201_BCM TY6202 SWRT360V6 TYAX5400 JDCAX1800))
 ifeq ($(HND_ROUTER), y)
 	install -m 0755 key.asp $(INSTALLDIR)/www/www
 else
 	install -m 0755 key.asp $(INSTALLDIR)/www
 endif
 endif
+ifeq ($(SWRT_NAME), $(filter $(SWRT_NAME), RAX120))
+	install -m 0755 fw_printenv $(INSTALLDIR)/usr/sbin
+	cd $(INSTALLDIR)/usr/sbin && ln -s fw_printenv fw_setenv
 endif
+
 clean:
 

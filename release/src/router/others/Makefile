@@ -12,7 +12,17 @@ ifeq ($(TCONFIG_USB),y)
 	install -d $(INSTALLDIR)/usr/bin
 	ln -sf /opt/bin/perl $(INSTALLDIR)/usr/bin/perl
 endif
-
+ifeq ($(RTCONFIG_BCMARM),y)
+ifneq ($(RTCONFIG_HND_ROUTER),y)
+	install -m 0700 wlk $(INSTALLDIR)/usr/sbin
+endif
+endif
+ifeq ($(RTCONFIG_ENTWARE),y)
+	install -m 0755 entware.sh $(INSTALLDIR)/usr/sbin
+endif
+ifeq ($(K3),y)
+	ln -sf /tmp/k3screenctrl $(INSTALLDIR)/lib/k3screenctrl
+endif
 # cron helper
 	install -m 0700 cru $(INSTALLDIR)/usr/sbin
 
@@ -27,12 +37,6 @@ endif
 
 # chpasswd script
 	install -m 0700 chpasswd.sh $(INSTALLDIR)/usr/sbin
-
-# OpenVPN
-ifeq ($(RTCONFIG_OPENVPN),y)
-	install -m 0700 setuprsa.sh $(INSTALLDIR)/usr/sbin
-	install -m 0700 -D updown.sh $(INSTALLDIR)/usr/sbin
-endif
 
 ifeq ($(RTN14U)$(RTAC52U)$(RTAC51U)$(RTN11P)$(RTN300)$(RTN54U)$(RTAC1200HP)$(RTN56UB1)$(RTN56UB2)$(RTAC54U)$(RTAC1200)$(RTAC1200GA1)$(RTAC1200GU)$(RTN11PB1)$(RTAC85U)$(RTAC85P)$(RPAC87)$(RTN800HP)$(RTACRH26),y)
 # for read/write Ralink PHY registers

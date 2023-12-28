@@ -181,6 +181,11 @@ config RTCONFIG_DDNS
 	bool "Dynamic DNS"
 	default y
 
+config RTCONFIG_INADYN
+	bool "Dynamic DNS"
+	depends on RTCONFIG_DDNS
+	default n
+
 config RTCONFIG_L7
 	bool "Layer 7 Netfilter"
 	default y
@@ -377,6 +382,14 @@ config RTCONFIG_SYSSTATE
 	bool "Support additional debug logs"
 	default n
 
+config RTCONFIG_AHS
+	bool "Auto Healing System"
+	default n
+
+config RTCONFIG_LIBASC
+	bool "ASUS server command library"
+	default n
+
 config RTCONFIG_DUALWAN
 	bool "Dual WAN Support"
 	default n
@@ -391,6 +404,10 @@ config RTCONFIG_USER_LOW_RSSI
 
 config RTCONFIG_NEW_USER_LOW_RSSI
 	bool "User specified accepted min rssi"
+	default n
+
+config RTCONFIG_FRS_FEEDBACK
+	bool "Feedback features Support"
 	default n
 
 config RTCONFIG_PUSH_EMAIL
@@ -1765,6 +1782,22 @@ config RTCONFIG_WTF_REDEEM
 	bool "wtf_redeem support"
 	default n
 
+config RTCONFIG_FRS_LIVE_UPDATE
+	bool "RTCONFIG_FRS_LIVE_UPDATE support"
+	default n
+
+config RTCONFIG_ASD
+	bool "RTCONFIG_ASD support"
+	default n
+
+config RTCONFIG_UUPLUGIN
+	bool "UU plugin support"
+	default n
+
+config RTCONFIG_CAPTCHA
+	bool "Web UI supports captcha"
+	default n
+
 config RTCONFIG_SOFTCENTER
 	bool "softcenter"
 	default n
@@ -1773,15 +1806,35 @@ config RTCONFIG_SMARTDNS
 	bool "smart dns"
 	default n
 
-config RTCONFIG_FRS_LIVE_UPDATE
-	bool "RTCONFIG_FRS_LIVE_UPDATE support"
+config RTCONFIG_SWRT
+	bool "RTCONFIG_SWRT"
 	default n
 
-config RTCONFIG_UUPLUGIN
-	bool "UU plugin support"
+config RTCONFIG_SWRT_LED
+	bool "RTCONFIG_SWRT_LED"
 	default n
 
-config RTCONFIG_FRS_FEEDBACK
-	bool "Feedback features Support"
+config RTCONFIG_SWRT_UU
+	bool "RTCONFIG_SWRT_UU"
 	default n
 
+config RTCONFIG_SWRT_FULLCONE
+	bool "RTCONFIG_SWRT_FULLCONE"
+	default n
+
+config RTCONFIG_SWRT_I2CLED
+	bool "RTCONFIG_SWRT_I2CLED"
+	default n
+
+config RTCONFIG_SWRT_FASTPATH
+	bool "Q-Path Mass Storage accelerater"
+	default n
+
+config RTCONFIG_SWRT_KVR
+	bool "swrt kvr support"
+	depends on RTCONFIG_RALINK || RTCONFIG_LANTIQ || RTCONFIG_QCA
+	default n
+
+config RTCONFIG_ENTWARE
+	bool "install entware"
+	default n

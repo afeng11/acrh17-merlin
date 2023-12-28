@@ -263,6 +263,20 @@ static inline char * strcat_r(const char *s1, const char *s2, char *buf)
 				word[sizeof(word) - 1] = '\0', \
 				next = strchr(next, '>'))
 
+/* Copy each token in wordlist delimited by ascii_124 into word */
+#define foreach_124(word, wordlist, next) \
+		for (next = &wordlist[strspn(wordlist, "|")], \
+				strncpy(word, next, sizeof(word)), \
+				word[strcspn(word, "|")] = '\0', \
+				word[sizeof(word) - 1] = '\0', \
+				next = strchr(next, '|'); \
+				strlen(word); \
+				next = next ? &next[strspn(next, "|")] : "", \
+				strncpy(word, next, sizeof(word)), \
+				word[strcspn(word, "|")] = '\0', \
+				word[sizeof(word) - 1] = '\0', \
+				next = strchr(next, '|'))
+
 /* Return NUL instead of NULL if undefined */
 #define safe_getenv(s) (getenv(s) ? : "")
 
@@ -404,5 +418,9 @@ extern char *ether_etoa2(const unsigned char *e, char *a);
 extern char *ATE_FACTORY_MODE_STR();
 extern char *ATE_UPGRADE_MODE_STR();
 extern int hex2str(unsigned char *hex, char *str, int hex_len);
+extern int ether_inc(unsigned char *e, const unsigned char n);
+extern char *ether_cal(const char *e, char *a, int i);
+extern char *ether_cal_b(const unsigned char *e, char *a, int i);
 
 #endif /* _shutils_h_ */
+

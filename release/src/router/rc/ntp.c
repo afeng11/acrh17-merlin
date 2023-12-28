@@ -51,18 +51,21 @@ static void ntp_service()
 	if (first_sync) {
 		first_sync = 0;
 
+		setup_timezone();
+
 		nvram_set("reload_svc_radio", "1");
 		nvram_set("svc_ready", "1");
-
-		setup_timezone();
+#ifndef RTCONFIG_QCA
+		timecheck();
+#endif
 
 #ifdef RTCONFIG_DISK_MONITOR
 		notify_rc("restart_diskmon");
 #endif
 #ifdef RTCONFIG_UUPLUGIN
 		if(nvram_get_int("uu_enable"))
-#if defined(R8000P) || defined(R7900P) || defined(K3) || defined(SBRAC3200P) || defined(RTAC3100) || defined(RTAC3200) || defined(EA6700) || defined(RAX20) || defined(SBRAC1900P) || defined(XWR3100) || defined(RTAC82U)
-		exec_uu_merlinr();
+#if defined(RTCONFIG_SWRT_UU)
+		exec_uu_swrt();
 #else
 		exec_uu();
 #endif

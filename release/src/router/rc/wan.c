@@ -83,6 +83,8 @@
 #ifdef RTCONFIG_BWDPI
 #include <bwdpi_common.h>
 #endif
+#include<swrt.h>
+
 #define	MAX_MAC_NUM	16
 static int mac_num;
 static char mac_clone[MAX_MAC_NUM][18];
@@ -623,8 +625,15 @@ void update_wan_state(char *prefix, int state, int reason)
     else if (state == WAN_STATE_CONNECTED) {
 		sprintf(tmp,"%c",prefix[3]);
 		run_custom_script("wan-start", 0, tmp, NULL);
-		nvram_set_int("sc_wan_sig", 1);
-    }
+#if defined(RTCONFIG_SOFTCENTER)
+		if(nvram_match("sc_mount", "2") && !f_exists("/jffs/softcenter/.sc_cifs"))
+			softcenter_trigger(SOFTCENTER_CIFS_MOUNT);
+		nvram_set("sc_wan_sig", "1");
+#endif
+#if defined(RTCONFIG_ENTWARE)
+		nvram_set_int("entware_wan_sig", 1);
+#endif
+	}
 
 #if defined(RTCONFIG_WANRED_LED)
 	switch (state) {
@@ -1778,7 +1787,7 @@ stop_wan_if(int unit)
 	/* Stop l2tp */
 	if (strcmp(wan_proto, "l2tp") == 0) {
 		kill_pidfile_tk("/var/run/l2tpd.pid");
-		usleep(1000*10000);
+		usleep(1000*1000);
 	}
 
 	/* Stop pppd */
@@ -1793,6 +1802,16 @@ stop_wan_if(int unit)
 	/* Stop pre-authenticator */
 	stop_auth(unit, 0);
 
+#if 1
+	/* Clean WAN interface */
+	snprintf(wan_ifname, sizeof(wan_ifname), "%s", nvram_safe_get(strcat_r(prefix, "ifname", tmp)));
+	if (*wan_ifname && *wan_ifname != '/') {
+#ifdef RTCONFIG_IPV6
+		disable_ipv6(wan_ifname);
+#endif
+		ifconfig(wan_ifname, IFUP, "0.0.0.0", NULL);
+	}
+#else
 	/* Bring down WAN interfaces */
 	// Does it have to?
 	snprintf(wan_ifname, sizeof(wan_ifname), "%s", nvram_safe_get(strcat_r(prefix, "ifname", tmp)));
@@ -1815,6 +1834,7 @@ stop_wan_if(int unit)
 #endif
 		}
 	}
+#endif
 
 #ifdef RTCONFIG_DSL
 #ifdef RTCONFIG_DUALWAN
@@ -1957,9 +1977,6 @@ int update_resolvconf(void)
 	start_smartdns();
 #endif
 
-#ifdef RTCONFIG_OPENVPN
-	if (!write_ovpn_resolv(fp, fp_servers))
-#endif
 	{
 		for (unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; unit++) {
 			char *wan_xdns, *wan_xdomain;
@@ -1986,6 +2003,10 @@ int update_resolvconf(void)
 			do {
 #ifdef RTCONFIG_YANDEXDNS
 				if (yadns_mode != YADNS_DISABLED)
+					break;
+#endif
+#ifdef RTCONFIG_OPENVPN
+				if (write_ovpn_resolv_dnsmasq(fp_servers))
 					break;
 #endif
 #ifdef RTCONFIG_DUALWAN

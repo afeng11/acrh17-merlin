@@ -899,7 +899,7 @@ width:122px;
 	background: url(images/New_ui/icon_menues.png);
 	background-position: 0px -288px;
 }
-.menu_Tools{
+.menu_Tools, .menu_Softcenter, .menu_Entware{
 	background: url(images/New_ui/icon_menues.png);
 	background-position: 0px -288px;
 }
@@ -910,6 +910,11 @@ width:122px;
 .menu_QIS{
 	background: url(images/New_ui/icon_indexes.png);
 	background-position: 0px 0px;
+}
+.menu_OpenNAT{
+	background: url(images/New_ui/open_NAT.svg);
+	background-size: 100%;
+	background-repeat: no-repeat;
 }
 .menuClicked{
 	background: #8AA6BE; /* Old browsers */

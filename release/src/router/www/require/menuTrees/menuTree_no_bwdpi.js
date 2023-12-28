@@ -161,6 +161,7 @@ define(function(){
 					{url: "Advanced_GWStaticRoute_Content.asp", tabName: "<#menu5_2_3#>"},
 					{url: "Advanced_IPTV_Content.asp", tabName: "IPTV"},
 					{url: "Advanced_SwitchCtrl_Content.asp", tabName: "<#Switch_itemname#>"},
+					{url: "Advanced_SmartDNS_Content.asp", tabName: "SmartDNS"},
 					{url: "NULL", tabName: "__INHERIT__"}
 				] 
 			},
@@ -259,6 +260,23 @@ define(function(){
 				]
 			},
 			{
+				menuName: "Entware",
+				index: "menu_Split",
+				tab: [
+					{url: "NULL", tabName: "__HIDE__"}
+				]
+			},
+			{
+				menuName: "Entware",
+				index: "menu_Entware",
+				tab: [
+					{url: "Entware_start.asp", tabName: "<#Entware_home#>"},
+					{url: "Entware_installed.asp", tabName: "<#Entware_installed#>"},
+					{url: "Entware_list.asp", tabName: "<#Entware_list#>"},
+					{url: "NULL", tabName: "__INHERIT__"}
+				] 
+			},
+			{
 				menuName: "<#Softcenter#>",
 				index: "menu_Split",
 				tab: [
@@ -298,7 +316,7 @@ define(function(){
 					retArray.push("menu_APP");
 				}
 
-				if(!cloudsync_support && !aicloudipk_support){
+				if((!cloudsync_support && !aicloudipk_support) || nocloudsync_support){
 					retArray.push("menu_AiCloud");
 				}
 
@@ -318,7 +336,7 @@ define(function(){
 					retArray.push("menu_VLAN");
 				}
 
-				if(!wtfast_support) {
+				if(!wtfast_support && !gameMode_support) {
 					retArray.push("menu_GameBoost");
 				}
 
@@ -390,8 +408,15 @@ define(function(){
 						retArray.push("menu_Wireless");
 					}
 				}
-				else if (<% nvram_get("sc_installed"); %> == "0"){
+				if (!softcenter_support || '<% nvram_get("sc_installed"); %>' != '1'){
 					retArray.push("menu_Softcenter");
+				}
+				if (!entware_support){
+					retArray.push("menu_Entware");
+					for(i=0; i<menuTree.list.length; i++){
+						if(menuTree.list[i].menuName == 'Entware')
+							menuTree.list.splice(i,1);
+					}
 				}
 
 				return retArray;
@@ -401,6 +426,9 @@ define(function(){
 				var retArray = [];
 
 				/* By RC Support */
+				if (!smartdns_support){
+					retArray.push("Advanced_SmartDNS_Content.asp");
+				}
 				if(!bwdpi_support){
 					retArray.push("AdaptiveQoS_Bandwidth_Monitor.asp");
 					retArray.push("AdaptiveQoS_WebHistory.asp");
@@ -451,7 +479,7 @@ define(function(){
 					retArray.push("YandexDNS.asp");
 				}
 
-				if(!feedback_support) {		
+				if(!frs_feedback_support) {		
 					retArray.push("Advanced_Feedback.asp");
 				}
 
@@ -539,10 +567,6 @@ define(function(){
 					retArray.push("AdaptiveQoS_ROG.asp");
 				}
 
-				if(!wtfast_support){
-					retArray.push("GameBoost.asp");
-				}
-
 				if(!IPv6_support){
 					retArray.push("Main_IPV6Status_Content.asp");
 				}
@@ -602,6 +626,7 @@ define(function(){
 					retArray.push("Main_RouteStatus_Content.asp");
 					retArray.push("Main_IPTStatus_Content.asp");
 					retArray.push("Main_ConnStatus_Content.asp");
+					retArray.push("Advanced_Smart_Connect.asp");
 
 					if(!concurrep_support){
 						retArray.push("Advanced_Wireless_Content.asp");
